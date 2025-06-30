@@ -24,10 +24,18 @@ const clauses = [
 // We need to convert the string into a wallet address so make sure to explain this. 
 // This also means we need to import and install packages that are not part of 
 // the existing docs but are widely use in blockchain development (ethers)
-const mnemonic = 'subject stuff frame social gasp thought proud shift coffee hero defense survey';
+const mnemonic = 'swamp wrestle resist odor time valley frog perfect drill turn interest topic';
 const ethersWallet = EthersWallet.fromPhrase(mnemonic);
 const privateKey = ethersWallet.privateKey.slice(2);
 const senderAddress = ethersWallet.address.toLowerCase();
+
+// For some reason I still don't understand, ethers creates a new
+// public wallet address from the mnemonic (instead of pulling the existing one.)
+// Use the debugging below to confirm the public wallet has VTHO 
+
+// const account = await thor.accounts.getAccount(senderAddress);
+// console.log(senderAddress);
+// console.log("Available energy:", account.energy.toString());
 
 //Calculate Gas
 const gasResult = await thor.transactions.estimateGas(clauses);

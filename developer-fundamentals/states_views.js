@@ -1,7 +1,7 @@
 import { ThorClient } from '@vechain/sdk-network';
 import { ErrorDecoder } from 'ethers-decode-error';
-import energyAbi from './energy.json' assert { type: 'json' };
-const thor = ThorClient.fromUrl('https://mainnet.vechain.org');
+import energyAbi from './energy' assert { type: 'json' };
+const thor = ThorClient.at('https://mainnet.vechain.org');
 
 const vtho = thor.contracts.load(
   '0x0000000000000000000000000000456e65726779',

@@ -12,10 +12,12 @@
   "description": "",
   "dependencies": {
     "@vechain/sdk-core": "^1.2.0",
-    "@vechain/sdk-network": "^1.2.0-rc.3",
+    "@vechain/sdk-network": "^1.2.0",
     "code": "^5.2.4",
+    "dotenv": "^17.0.0",
     "express": "^5.1.0",
     "node-fetch": "^3.3.2",
+    "websockets": "^0.2.0",
     "ws": "^8.18.2"
   }
 }

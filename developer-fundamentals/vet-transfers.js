@@ -1,10 +1,6 @@
 import { ThorClient } from '@vechain/sdk-network';
-const nodeUrl = 'https://mainnet.vechain.org';
+const thor = ThorClient.at('https://mainnet.vechain.org');
 
-console.log('Connecting to', nodeUrl);
-const thor = ThorClient.at(nodeUrl);
-
-// access VET transfers
 const logs = await thor.logs.filterTransferLogs({
   options: {
     offset: 0,
@@ -12,23 +8,19 @@ const logs = await thor.logs.filterTransferLogs({
   },
   range: {
     unit: 'block',
-    from: 0,
+    from: 1900000,
     to: 20000000,
   },
   criteriaSet: [
     {
-      // VET receiver
-      recipient: '0x000000000000000000000000000000000000dead',
+      recipient: null,
 
-      // transaction signer/origin
-      txOrigin: '0x19135a7c5c51950b3aa4b8de5076dd7e5fb630d4',
+      txOrigin: null,
 
-      // VET sender
-      sender: '0x19135a7c5c51950b3aa4b8de5076dd7e5fb630d4',
+      sender: null,
     },
   ],
   order: 'asc',
 });
 
-// Add this line to see the output!
-    console.log('Retrieved VET transfer logs:', logs);
+console.log('Retrieved VET transfer logs:', logs);
