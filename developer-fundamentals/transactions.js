@@ -36,15 +36,7 @@ const gasResult = await thor.transactions.estimateGas(clauses);
 // Fee delegation is set to "false" by default
 const tx = await thor.transactions.buildTransactionBody(
     clauses,
-    gasResult.totalGas,
-        {
-        gas: gasResult.totalGas,
-        gasPriceCoef: 0,
-        expiration: 32,
-        signer: senderAddress,
-        caller: senderAddress,
-        gasPayer: senderAddress 
-    }
+    gasResult.totalGas
 );
 
 // Sign Transaction. Needs 4 steps

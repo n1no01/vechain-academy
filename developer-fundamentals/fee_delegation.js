@@ -1,100 +1,72 @@
-import {
-  ThorClient,
-  VeChainProvider,
-  ProviderInternalBaseWallet,
-  signerUtils,
-} from '@vechain/sdk-network';
-import {
-  ABIFunction,
-  Address,
-  Clause,
-  HexUInt,
-  Secp256k1,
-  Transaction,
-} from '@vechain/sdk-core';
-import express from 'express';
+import { ThorClient, ProviderInternalBaseWallet, VeChainProvider } from '@vechain/sdk-network';
+import { Clause, ABIFunction, Transaction, HexUInt } from '@vechain/sdk-core';
+import { Wallet as EthersWallet } from 'ethers';
 
-// setup simple express server
-const app = express();
-app.use(express.json());
-app.listen(3000);
-
-app.post('/', (req, res) => {
-  console.log('Incoming request', req.body);
-  const transactionToSign = Transaction.decode(
-    HexUInt.of(req.body.raw).bytes
-  );
-  const delegatedHash = transactionToSign.getSignatureHash(req.body.origin);
-  const signature = HexUInt.of(
-    Secp256k1.sign(delegatedHash, delegatorPrivateKey)
-  ).toString();
-  console.log('Signature', signature);
-
-  res.json({ signature });
-});
-
-// build a transaction, signed with url fee delegation
 const thor = ThorClient.at('https://testnet.vechain.org/');
-const privateKey = await Secp256k1.generatePrivateKey();
-const senderAddress = Address.ofPrivateKey(privateKey).toString();
-const delegatorPrivateKey = await Secp256k1.generatePrivateKey();
-const tx = await generateSampleTransaction();
 
-const providerWithDelegationEnabled = new VeChainProvider(
+// Clauses
+const clauses = [
+    Clause.callFunction(
+        '0x8384738c995d49c5b692560ae688fc8b51af1059',
+        new ABIFunction({
+            name: 'increment',
+            inputs: [],
+            outputs: [],
+            constant: false,
+            payable: false,
+            type: 'function',
+        })
+    ),
+];
+
+//Prepare Wallet
+const mnemonic = 'subject stuff frame social gasp thought proud shift coffee hero defense survey';
+const ethersWallet = EthersWallet.fromPhrase(mnemonic);
+const privateKey = ethersWallet.privateKey.slice(2);
+const senderAddress = ethersWallet.address.toLowerCase();
+
+//Calculate Gas
+const gasResult = await thor.transactions.estimateGas(clauses);
+
+//Build Transaction with fee delegation
+const tx = await thor.transactions.buildTransactionBody( clauses, gasResult.totalGas,
+    { isDelegated: true }
+);
+
+// Sign Transaction. Needs 4 steps
+//Step 1: Get signer
+const wallet = new ProviderInternalBaseWallet(
+  [{ privateKey: privateKey, address: senderAddress }],
+  {
+    gasPayer: {
+      gasPayerServiceUrl: 'https://sponsor-testnet.vechain.energy/by/90',
+    },
+  }
+);
+
+const provider = new VeChainProvider(
   thor,
-  new ProviderInternalBaseWallet(
-    [
-      {
-        privateKey: privateKey,
-        address: senderAddress,
-      },
-    ],
-    {
-      delegator: { delegatorUrl: 'http://localhost:3000/' },
-    }
-  ),
-
+  wallet,
   // Enable fee delegation
+ true
+);
+
+const signer = await provider.getSigner(senderAddress);
+
+// Step 2: Sign transaction
+const rawSignedTx = await signer.signTransaction(tx, privateKey);
+
+// Step 3: Build Signed Transaction Object
+const signedTx = Transaction.decode(
+  HexUInt.of(rawSignedTx).bytes,
   true
 );
-const signedTx = await (
-  await providerWithDelegationEnabled.getSigner(senderAddress)
-).signTransaction(
-  signerUtils.transactionBodyToTransactionRequestInput(tx, senderAddress)
+
+// Step 4: Send Transaction
+const sendTransactionResult = await thor.transactions.sendTransaction(signedTx);
+
+// Wait for results
+const txReceipt = await thor.transactions.waitForTransaction(
+  sendTransactionResult.id
 );
-process.exit(0);
-
-async function generateSampleTransaction() {
-  // generate random key for this script
-  const privateKey = await Secp256k1.generatePrivateKey();
-
-  // build instructions to execute
-  const incrementAbi = new ABIFunction({
-    name: 'increment',
-    inputs: [],
-    outputs: [],
-    constant: false,
-    payable: false,
-    type: 'function',
-  });
-  const clauses = [
-    Clause.callFunction(
-      '0x8384738c995d49c5b692560ae688fc8b51af1059',
-      incrementAbi
-    ),
-  ];
-
-  // estimate how much gas the transaction will cost
-  const gasResult = await thor.gas.estimateGas(clauses);
-
-  // build a transaction
-  const tx = await thor.transactions.buildTransactionBody(
-    clauses,
-    gasResult.totalGas,
-    {
-      isDelegated: true,
-    }
-  );
-
-  return tx;
-}
+console.log(txReceipt);
