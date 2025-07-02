@@ -1,6 +1,5 @@
 import { ThorClient, ProviderInternalBaseWallet, VeChainProvider } from '@vechain/sdk-network';
-import { Clause, ABIFunction, Transaction, HexUInt } from '@vechain/sdk-core';
-import { Wallet as EthersWallet } from 'ethers';
+import { Clause, ABIFunction, Secp256k1, Address, Transaction, HexUInt } from '@vechain/sdk-core';
 
 const thor = ThorClient.at('https://testnet.vechain.org/');
 
@@ -20,16 +19,15 @@ const clauses = [
 ];
 
 //Prepare Wallet
-const mnemonic = 'subject stuff frame social gasp thought proud shift coffee hero defense survey';
-const ethersWallet = EthersWallet.fromPhrase(mnemonic);
-const privateKey = ethersWallet.privateKey.slice(2);
-const senderAddress = ethersWallet.address.toLowerCase();
+const privateKey = await Secp256k1.generatePrivateKey();
+const senderAddress = Address.ofPrivateKey(privateKey);
+console.log("Address: 0x" + senderAddress.digits)
 
 //Calculate Gas
 const gasResult = await thor.transactions.estimateGas(clauses);
 
 //Build Transaction with fee delegation
-const tx = await thor.transactions.buildTransactionBody( clauses, gasResult.totalGas,
+const tx = await thor.transactions.buildTransactionBody(clauses, gasResult.totalGas,
     { isDelegated: true }
 );
 
@@ -44,9 +42,7 @@ const wallet = new ProviderInternalBaseWallet(
   }
 );
 
-const provider = new VeChainProvider(
-  thor,
-  wallet,
+const provider = new VeChainProvider(thor, wallet,
   // Enable fee delegation
  true
 );
@@ -66,7 +62,5 @@ const signedTx = Transaction.decode(
 const sendTransactionResult = await thor.transactions.sendTransaction(signedTx);
 
 // Wait for results
-const txReceipt = await thor.transactions.waitForTransaction(
-  sendTransactionResult.id
-);
+const txReceipt = await thor.transactions.waitForTransaction(sendTransactionResult.id);
 console.log(txReceipt);
