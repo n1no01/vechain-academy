@@ -3,6 +3,11 @@ import { Clause, ABIFunction, Secp256k1, Address, Transaction, HexUInt } from '@
 
 const thor = ThorClient.at('https://testnet.vechain.org/');
 
+//Prepare Wallet
+const privateKey = await Secp256k1.generatePrivateKey();
+const senderAddress = Address.ofPrivateKey(privateKey);
+console.log("Address: 0x" + senderAddress.digits)
+
 // Clauses
 const clauses = [
     Clause.callFunction(
@@ -17,11 +22,6 @@ const clauses = [
         })
     ),
 ];
-
-//Prepare Wallet
-const privateKey = await Secp256k1.generatePrivateKey();
-const senderAddress = Address.ofPrivateKey(privateKey);
-console.log("Address: 0x" + senderAddress.digits)
 
 //Calculate Gas
 const gasResult = await thor.transactions.estimateGas(clauses);
