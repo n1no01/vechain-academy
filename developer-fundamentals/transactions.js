@@ -41,7 +41,7 @@ const provider = new VeChainProvider( thor, wallet,
  false
 );
 
-const signer = await provider.getSigner(senderAddress);
+const signer = await provider.getSigner(0);
 
 // Step 2: Sign transaction
 const rawSignedTx = await signer.signTransaction(tx, privateKey);
@@ -54,6 +54,12 @@ const signedTx = Transaction.decode(
 
 // Step 4: Send Transaction
 const sendTransactionResult = await thor.transactions.sendTransaction(signedTx);
+console.log(sendTransactionResult)
+
+// NOTE!!! PAUSE HERE. SHOW HOW WE GET AN ERROR AS THE WALLET NEEDS TO BE FUNDED. 
+// THERE'S A METHOD BELOW THIS VIDEO WHERE WE SHOW HOW TO USE YOUR OWN SIGNER ADDRESS. 
+// HOWEVER, VECHAIN OFFERS A UNIQUE "FEE DELEGATION" FUNCTION THAT OFFLOADS THE GAS FEES 
+// TO A SPONSOR. WE'LL TAKE A LOOK AT THIS IN THE NEXT VIDEO
 
 // Wait for results
 const txReceipt = await thor.transactions.waitForTransaction(sendTransactionResult.id);

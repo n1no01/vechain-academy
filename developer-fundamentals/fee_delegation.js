@@ -47,7 +47,7 @@ const provider = new VeChainProvider(thor, wallet,
  true
 );
 
-const signer = await provider.getSigner(senderAddress);
+const signer = await provider.getSigner(0);
 
 // Step 2: Sign transaction
 const rawSignedTx = await signer.signTransaction(tx, privateKey);
@@ -60,6 +60,8 @@ const signedTx = Transaction.decode(
 
 // Step 4: Send Transaction
 const sendTransactionResult = await thor.transactions.sendTransaction(signedTx);
+
+// NOTE: NOW THAT YOU'VE EXPLAINED FEE DELEGATION, PRINT THE RESULT OF THE TRANSACTION
 
 // Wait for results
 const txReceipt = await thor.transactions.waitForTransaction(sendTransactionResult.id);
