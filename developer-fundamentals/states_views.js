@@ -1,7 +1,8 @@
 import { ThorClient } from '@vechain/sdk-network';
-import { ErrorDecoder } from 'ethers-decode-error';
-import energyAbi from './energy' assert { type: 'json' };
 const thor = ThorClient.at('https://mainnet.vechain.org');
+
+const publicabi = await fetch('https://raw.githubusercontent.com/vechain/b32/master/ABIs/energy.json');
+const energyAbi = await publicabi.json();
 
 const vtho = thor.contracts.load(
   '0x0000000000000000000000000000456e65726779',

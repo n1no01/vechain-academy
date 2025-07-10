@@ -61,8 +61,6 @@ const signedTx = Transaction.decode(
 // Step 4: Send Transaction
 const sendTransactionResult = await thor.transactions.sendTransaction(signedTx);
 
-// NOTE: NOW THAT YOU'VE EXPLAINED FEE DELEGATION, PRINT THE RESULT OF THE TRANSACTION
-
 // Wait for results
 const txReceipt = await thor.transactions.waitForTransaction(sendTransactionResult.id);
 console.log(txReceipt);
