@@ -8,7 +8,7 @@ const txId =
 
 // load transaction details
 const tx = await thor.transactions.getTransaction(txId);
-console.log(tx);
+// console.log(tx);
 
 // load effected changes & outputs with the transaction
 const txReceipt = await thor.transactions.getTransactionReceipt(txId);
