@@ -1,8 +1,5 @@
 import { ThorClient } from '@vechain/sdk-network';
-const nodeUrl = 'https://mainnet.vechain.org';
-
-console.log('Connecting to', nodeUrl);
-const thor = ThorClient.at(nodeUrl);
+const thor = ThorClient.at('https://mainnet.vechain.org');
 
 // get a single transaction
 const txId =
@@ -11,8 +8,8 @@ const txId =
 
 // load transaction details
 const tx = await thor.transactions.getTransaction(txId);
-//console.log(tx);
+console.log(tx);
 
 // load effected changes & outputs with the transaction
 const txReceipt = await thor.transactions.getTransactionReceipt(txId);
-console.log(txReceipt);
+// console.log(txReceipt);
