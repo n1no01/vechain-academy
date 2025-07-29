@@ -1,7 +1,9 @@
 import { ThorClient } from '@vechain/sdk-network';
 const thor = ThorClient.at('https://mainnet.vechain.org');
 
-const publicabi = await fetch('https://raw.githubusercontent.com/vechain/b32/master/ABIs/energy.json');
+const publicabi = await fetch(
+  'https://raw.githubusercontent.com/vechain/b32/master/ABIs/energy.json'
+);
 const energyAbi = await publicabi.json();
 
 const vtho = thor.contracts.load(
