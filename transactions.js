@@ -1,26 +1,22 @@
-import {
-  ThorClient,
-  VeChainProvider,
-  ProviderInternalBaseWallet,
-  signerUtils,
-} from '@vechain/sdk-network';
-import {
-  ABIFunction,
-  clauseBuilder,
-  TransactionHandler,
-} from '@vechain/sdk-core';
+import { ThorClient, VeChainProvider, ProviderInternalBaseWallet } from "@vechain/sdk-network";
+import { Clause, ABIFunction, Transaction, HexUInt } from "@vechain/sdk-core";
+import { Wallet as EthersWallet } from 'ethers';
+
+import 'dotenv/config';
 
 const thor = ThorClient.at('https://testnet.vechain.org');
 
-// generate random key for this script
-const privateKey = 'swamp wrestle resist odor time valley frog perfect drill turn interest topic'
-const senderAddress = privateKey
+const mnemonic = process.env.MNEMONIC;
+const prepWallet = EthersWallet.fromPhrase(mnemonic);
+const privateKey = prepWallet.privateKey.slice(2);
+const senderAddress = prepWallet.address.toLowerCase();
+console.log(senderAddress);
 
-// build instructions to execute
+/// Clauses
 const clauses = [
-  clauseBuilder.functionInteraction(
-    '0x8384738c995d49c5b692560ae688fc8b51af1059',
-    new ABIFunction({
+    Clause.callFunction(
+        '0x8384738c995d49c5b692560ae688fc8b51af1059',
+        new ABIFunction({
             name: 'increment',
             inputs: [],
             outputs: [],
@@ -28,61 +24,41 @@ const clauses = [
             payable: false,
             type: 'function',
         })
-  ),
+    ),
 ];
 
-// estimate how much gas the transaction will cost
-const gasResult = await thor.gas.estimateGas(clauses, senderAddress);
+//Calculate Gas
+const gasResult = await thor.transactions.estimateGas(clauses);
 
-// build a transaction
-const txBody = await thor.transactions.buildTransactionBody(
-  clauses,
-  gasResult.totalGas,
-  {
-    isDelegated: true,
-  }
-);
+//Build Transaction.
+// Fee delegation is set to "false" by default
+const tx = await thor.transactions.buildTransactionBody(clauses, gasResult.totalGas);
 
-// sign the transaction
+// Sign Transaction. Needs 4 steps
+//Step 1: Get signer
 const wallet = new ProviderInternalBaseWallet(
-  [{ privateKey, address: senderAddress }],
-  {
-    delegator: {
-      delegatorUrl: 'https://sponsor-testnet.vechain.energy/by/90',
-    },
-  }
+  [{ privateKey: privateKey, address: senderAddress }]
 );
 
-// Create the provider (used in this case to sign the transaction with getSigner() method)
-const providerWithDelegationEnabled = new VeChainProvider(thor, wallet, true);
-
-const signer = await providerWithDelegationEnabled.getSigner(senderAddress);
-const txInput = signerUtils.transactionBodyToTransactionRequestInput(
-  txBody,
-  senderAddress
+const provider = new VeChainProvider( thor, wallet,
+  // Enable fee delegation
+ false
 );
 
-const rawDelegateSigned = await signer.signTransaction(txInput);
-const delegatedSigned = TransactionHandler.decode(
-  Buffer.from(rawDelegateSigned.slice(2), 'hex'),
+const signer = await provider.getSigner();
+
+// Step 2: Sign transaction
+const rawSignedTx = await signer.signTransaction(tx, privateKey);
+
+// Step 3: Build Signed Transaction Object
+const signedTx = Transaction.decode(
+  HexUInt.of(rawSignedTx).bytes,
   true
 );
 
-// send the transaction to the network
-const sendTransactionResult = await thor.transactions.sendTransaction(
-  delegatedSigned
-);
+// Step 4: Send Transaction
+const sendTransactionResult = await thor.transactions.sendTransaction(signedTx);
 
-console.log('Transaction sent', sendTransactionResult);
-console.log(
-  'Open',
-  `https://explore-testnet.vechain.org/transactions/${sendTransactionResult.id}`,
-  'to learn more'
-);
-console.log('');
-
-console.log('Waiting for transaction to be included in the next block');
-const txReceipt = await thor.transactions.waitForTransaction(
-  sendTransactionResult.id
-);
-console.log('Transaction processed', txReceipt);
+// Wait for results
+const txReceipt = await thor.transactions.waitForTransaction(sendTransactionResult.id);
+console.log(txReceipt);

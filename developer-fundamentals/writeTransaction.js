@@ -1,7 +1,16 @@
 import { ThorClient, VeChainProvider, ProviderInternalBaseWallet } from "@vechain/sdk-network";
 import { Clause, ABIFunction } from "@vechain/sdk-core";
+import { Wallet as EthersWallet } from 'ethers';
 
 const thor = ThorClient.at('https://testnet.vechain.org/');
+
+// const senderAddress = process.env.MNEMONIC;
+
+const mnemonic = process.env.MNEMONIC;
+// const ethersWallet = EthersWallet.fromPhrase(mnemonic);
+// const privateKey = ethersWallet.privateKey.slice(2);
+// const senderAddress = ethersWallet.address.toLowerCase();
+console.log(mnemonic);
 
 const clauses = [
     Clause.callFunction(
@@ -17,13 +26,9 @@ const clauses = [
     ),
 ];
 
-const senderAddress = process.env.MNEMONIC;
-const gasResult = await thor.transactions.estimateGas(clauses, senderAddress);
+const gasResult = await thor.transactions.estimateGas(clauses);
 
-const txBody = await thor.transactions.buildTransactionBody(
-    clauses,
-    gasResult.totalGas
-);
+const tx = await thor.transactions.buildTransactionBody(clauses,gasResult.totalGas);
 
 const wallet = new ProviderInternalBaseWallet(
   [{ privateKey, address: senderAddress }]
@@ -44,17 +49,6 @@ const signer = await provider.getSigner(senderAddress);
 
 const rawSignedTx = await signer.signTransaction(tx, privateKey);
 
-await fetch(`${nodeUrl}/transactions`, {
-  method: 'POST',
-  headers: {
-    'content-type': 'application/json',
-  },
-  body: JSON.stringify({
-    raw: rawSignedTx,
-  }),
-})
-
-
 const signedTx = Transaction.decode(
   HexUInt.of(rawSignedTx).bytes,
   true
@@ -65,3 +59,5 @@ const sendTransactionResult = await thor.transactions.sendTransaction(signedTx);
 const txReceipt = await thor.transactions.waitForTransaction(
   sendTransactionResult.id
 );
+
+// console.log(txReceipt);
