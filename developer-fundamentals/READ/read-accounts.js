@@ -3,7 +3,7 @@ import { ThorClient } from '@vechain/sdk-network';
 const thor = ThorClient.at('https://mainnet.vechain.org');
 
 const account = await thor.accounts.getAccount(
-  '0x1856C533aC2D94340aAa8544D35a5c1d4A21DeE7'
+  '0x1263c741069eDa8056534661256079D485e111eB'
 );
 
 console.log(account);

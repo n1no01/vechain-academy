@@ -4,7 +4,7 @@ const thor = ThorClient.at('https://mainnet.vechain.org');
 // get a single transaction
 const txId =
   process.argv[2] ??
-'0x1f5853416d3a48015bb7964f6d4a70cf0ff2774d99287e888483eec59b433b56';
+'0xca4083fa3ad31d98e6ab353831ae22971d9a87b50ded8a4d271d921f10dd17d5';
 
 // load transaction details
 const tx = await thor.transactions.getTransaction(txId);

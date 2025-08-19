@@ -1,14 +1,29 @@
-import { ThorClient, ProviderInternalBaseWallet, VeChainProvider } from '@vechain/sdk-network';
-import { Clause, ABIFunction, Secp256k1, Address, Transaction, HexUInt } from '@vechain/sdk-core';
+/**
+ * This script leverages the Ethers library to prepare 
+ * your wallet to sign a transaction.
+ * 
+ * This script can be adapted to work with Fee Delegation.
+ * 
+ * Alternatively, take a look at "transaction.js" to vew
+ * how to create a transaction script and sign it with a 
+ * one-time wallet.
+ */
 
-const thor = ThorClient.at('https://testnet.vechain.org/');
+import { ThorClient, VeChainProvider, ProviderInternalBaseWallet } from "@vechain/sdk-network";
+import { Clause, ABIFunction, Transaction, HexUInt } from "@vechain/sdk-core";
+import { Wallet as EthersWallet } from 'ethers';
 
-//Prepare Wallet
-const privateKey = await Secp256k1.generatePrivateKey();
-const senderAddress = Address.ofPrivateKey(privateKey);
-console.log("Address: 0x" + senderAddress.digits)
+import 'dotenv/config';
 
-// Clauses
+const thor = ThorClient.at('https://testnet.vechain.org');
+
+const mnemonic = process.env.MNEMONIC;
+const prepWallet = EthersWallet.fromPhrase(mnemonic);
+const privateKey = prepWallet.privateKey.slice(2);
+const senderAddress = prepWallet.address.toLowerCase();
+console.log(senderAddress);
+
+/// Clauses
 const clauses = [
     Clause.callFunction(
         '0x8384738c995d49c5b692560ae688fc8b51af1059',
@@ -41,7 +56,7 @@ const provider = new VeChainProvider( thor, wallet,
  false
 );
 
-const signer = await provider.getSigner(0);
+const signer = await provider.getSigner();
 
 // Step 2: Sign transaction
 const rawSignedTx = await signer.signTransaction(tx, privateKey);
@@ -54,12 +69,6 @@ const signedTx = Transaction.decode(
 
 // Step 4: Send Transaction
 const sendTransactionResult = await thor.transactions.sendTransaction(signedTx);
-console.log(sendTransactionResult)
-
-// NOTE!!! PAUSE HERE. SHOW HOW WE GET AN ERROR AS THE WALLET NEEDS TO BE FUNDED. 
-// THERE'S A METHOD BELOW THIS VIDEO WHERE WE SHOW HOW TO USE YOUR OWN SIGNER ADDRESS. 
-// HOWEVER, VECHAIN OFFERS A UNIQUE "FEE DELEGATION" FUNCTION THAT OFFLOADS THE GAS FEES 
-// TO A SPONSOR. WE'LL TAKE A LOOK AT THIS IN THE NEXT VIDEO
 
 // Wait for results
 const txReceipt = await thor.transactions.waitForTransaction(sendTransactionResult.id);
