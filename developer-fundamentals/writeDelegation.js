@@ -63,4 +63,4 @@ const sendTransactionResult = await thor.transactions.sendTransaction(signedTx);
 
 // Wait for results
 const txReceipt = await thor.transactions.waitForTransaction(sendTransactionResult.id);
-console.log(txReceipt);
+// console.log(txReceipt);

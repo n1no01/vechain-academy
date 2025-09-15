@@ -3,8 +3,9 @@ import WebSocket from 'ws';
 
 const wsUrl = subscriptions.getNewTransactionsSubscriptionUrl(
   'https://mainnet.vechain.org',
+  [],
   {
-    blockId: '0x0150be6faae18feaca872d82e51fdefd131f08a4b617f264fe0a13143b494441'
+    address: '0x0150be6faae18feaca872d82e51fdefd131f08a4b617f264fe0a13143b494441' // YOUR APP CONTRACT
   }
 );
 

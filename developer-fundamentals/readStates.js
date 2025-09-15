@@ -15,7 +15,7 @@ const name = await vtho.read.name();
 console.log('Name', name);
 
 const balanceNow = await vtho.read.balanceOf(
-  '0x0000000000000000000000000000000000000000'
+  '0x0000000000000000000000000000456e65726779'
 );
 console.log('Balance Now', balanceNow);
 
