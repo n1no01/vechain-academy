@@ -1,3 +1,11 @@
 node_modules
 vebetterDAO
 .env
+accounts.csv
+allBalances.js
+test_wallet.js
+wanchain
+accounts.js
+stargate_wallets.json
+veworld_recipients.json
+veworld_recipients_formatted.json

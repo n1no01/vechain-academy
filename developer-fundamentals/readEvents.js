@@ -5,13 +5,12 @@ const thor = ThorClient.at('https://mainnet.vechain.org');
 const filteredLogs = await thor.logs.filterRawEventLogs({
   criteriaSet: [
     {
-      address: '0x0000000000000000000000000000456e65726779',
+      address: '0x5ef79995FE8a89e0812330E4378eB2660ceDe699',
     },
   ],
   range: {
     unit: 'block',
-    from: 0,
-    to: 10000000,
+    from: 20000000,
   },
   options: { limit: 3 },
 });

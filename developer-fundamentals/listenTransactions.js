@@ -5,7 +5,7 @@ const wsUrl = subscriptions.getNewTransactionsSubscriptionUrl(
   'https://mainnet.vechain.org',
   [],
   {
-    address: '0x0150be6faae18feaca872d82e51fdefd131f08a4b617f264fe0a13143b494441' // YOUR APP CONTRACT
+    address: '0x5ef79995FE8a89e0812330E4378eB2660ceDe699' // YOUR APP CONTRACT
   }
 );
 

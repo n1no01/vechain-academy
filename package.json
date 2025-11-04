@@ -10,6 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@vechain/dapp-kit": "^2.0.4",
     "@vechain/sdk-core": "^1.2.0",
     "@vechain/sdk-network": "^1.2.0",
     "abitype": "^1.0.8",
