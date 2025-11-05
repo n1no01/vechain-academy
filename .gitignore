@@ -9,3 +9,6 @@ accounts.js
 stargate_wallets.json
 veworld_recipients.json
 veworld_recipients_formatted.json
+
+developer-fundamentals/node_modules
+developer-fundamentals/.env

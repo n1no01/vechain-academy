@@ -1,26 +1,25 @@
-import fs from 'fs';
 import { ThorClient } from '@vechain/sdk-network';
-
 const thor = ThorClient.at('https://mainnet.vechain.org');
 
-// Load and parse JSON file
-const data = JSON.parse(fs.readFileSync('stargate_wallets.json', 'utf8'));
-const addresses = data.unique_addresses;
+const publicabi = await fetch(
+  'https://raw.githubusercontent.com/vechain/b32/master/ABIs/VeBetterDAO-b3tr.json'
+);
+const abi = await publicabi.json();
 
-// Prepare CSV header
-let csv = 'address,balance,energy,hasCode,VET Balance,VTHO Balance, B3TR Balance\n';
+const b3tr = thor.contracts.load(
+    '0x5ef79995FE8a89e0812330E4378eB2660ceDe699',
+    abi
+);
 
-for (const addr of addresses) {
-  const account = await thor.accounts.getAccount(addr);
+const logs = await thor.logs.filterEventLogs({
+  criteriaSet: [...b3tr.filters.Transfer().criteriaSet],
+  range: {
+    unit: 'block',
+    from: 20000000,
+    to: 40000000,
+  },
+  options: { limit: 100 },
+  order: 'asc',
+});
 
-  const vetBalance = BigInt(account.balance) / 1000000000000000000n;
-  const vthoBalance = BigInt(account.energy) / 1000000000000000000n;
-
-  // Append a line to the CSV
-  csv += `${addr},${account.balance},${account.energy},${account.hasCode},${vetBalance},${vthoBalance}\n`;
-}
-
-// Write CSV file
-fs.writeFileSync('accounts.csv', csv, 'utf8');
-
-console.log('✅ CSV saved as accounts.csv');
+console.log(logs);
